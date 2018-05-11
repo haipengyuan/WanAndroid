@@ -8,5 +8,5 @@
     <item
         android:id="@+id/menu_item_category"
         android:title="@string/nav_category"
-        android:icon="@drawable/ic_home_black_24dp" />
+        android:icon="@drawable/ic_dashboard_black_24dp" />
 </menu>

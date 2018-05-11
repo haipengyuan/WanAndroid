@@ -11,23 +11,23 @@ import android.view.ViewGroup;
 import com.yhp.wanandroid.R;
 
 
-public class HomeFragment extends Fragment {
+public class CategoryFragment extends Fragment {
 
-    public static HomeFragment newInstance() {
-        HomeFragment fragment = new HomeFragment();
+    public static CategoryFragment newInstance() {
+        CategoryFragment fragment = new CategoryFragment();
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View view = inflater.inflate(R.layout.fragment_category, container, false);
+        return view;
     }
 
     @Override
@@ -39,5 +39,4 @@ public class HomeFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
     }
-
 }
