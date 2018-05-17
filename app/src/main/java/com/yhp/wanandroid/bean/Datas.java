@@ -30,29 +30,29 @@ public class Datas {
      * zan : 0
      */
 
-    String apkLink;
-    String author;
-    int chapterId;
-    String chapterName;
-    boolean collect;
-    int courseId;
-    String desc;
-    String envelopePic;
-    boolean fresh;
-    int id;
-    String link;
-    String niceDate;
-    String origin;
-    String projectLink;
-    long publishTime;
-    int superChapterId;
-    String superChapterName;
-    String title;
-    int type;
-    int userId;
-    int visible;
-    int zan;
-    List<TagsBean> tags;
+    public String apkLink;
+    public String author;
+    public int chapterId;
+    public String chapterName;
+    public boolean collect;
+    public int courseId;
+    public String desc;
+    public String envelopePic;
+    public boolean fresh;
+    public int id;
+    public String link;
+    public String niceDate;
+    public String origin;
+    public String projectLink;
+    public long publishTime;
+    public int superChapterId;
+    public String superChapterName;
+    public String title;
+    public int type;
+    public int userId;
+    public int visible;
+    public int zan;
+    public List<TagsBean> tags;
 
     public static class TagsBean {
         /**
@@ -60,7 +60,17 @@ public class Datas {
          * url : /project/list/1?cid=337
          */
 
-        String name;
-        String url;
+        public String name;
+        public String url;
+    }
+
+    @Override
+    public String toString() {
+        return "Datas{" +
+                "author='" + author + '\'' +
+                ", chapterName='" + chapterName + '\'' +
+                ", desc='" + desc + '\'' +
+                ", title='" + title + '\'' +
+                '}';
     }
 }

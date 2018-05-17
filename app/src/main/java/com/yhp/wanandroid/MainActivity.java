@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         long currentTime = System.currentTimeMillis();
         if ((currentTime - firstClickTime) < 2000) {
             super.onBackPressed();
+            System.exit(0);
         } else {
             Toast.makeText(this, R.string.double_click_exit, Toast.LENGTH_SHORT).show();
             firstClickTime = currentTime;

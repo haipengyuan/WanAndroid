@@ -9,4 +9,5 @@
     <string name="hot">热门</string>
     <string name="search">搜索</string>
     <string name="double_click_exit">再按一次退出</string>
+    <string name="author_prefix">作者：</string>
 </resources>

@@ -13,11 +13,24 @@ public class Data {
      * total : 1259
      */
 
-    int curPage;
-    List<Datas> datas;
-    int offset;
-    boolean over;
-    int pageCount;
-    int size;
-    int total;
+    public int curPage;
+    public List<Datas> datas;
+    public int offset;
+    public boolean over;
+    public int pageCount;
+    public int size;
+    public int total;
+
+    @Override
+    public String toString() {
+        return "Data{" +
+                "curPage=" + curPage +
+                ", datas.size=" + datas.size() +
+                ", offset=" + offset +
+                ", over=" + over +
+                ", pageCount=" + pageCount +
+                ", size=" + size +
+                ", total=" + total +
+                '}';
+    }
 }
