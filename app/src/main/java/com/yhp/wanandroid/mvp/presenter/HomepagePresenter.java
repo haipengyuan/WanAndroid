@@ -20,7 +20,6 @@ public class HomepagePresenter implements HomepageContract.Presenter {
     public HomepagePresenter(HomepageContract.View view) {
         mView = view;
 //        mView.setPresenter(this);
-        Log.e(TAG, "new homepagePresenter");
     }
 
 

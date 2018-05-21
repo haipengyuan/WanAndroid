@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.yhp.wanandroid.R;
 import com.yhp.wanandroid.bean.HomeArticlesResponse;
@@ -26,10 +27,12 @@ import butterknife.ButterKnife;
 
 public class HomeFragment extends Fragment implements HomepageContract.View {
 
-    @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
+    @BindView(R.id.content_recycler_view)
+    RecyclerView mContentView;
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.network_fail_layout)
+    RelativeLayout mNetworkFailView;
 
     private static final String TAG = HomeFragment.class.getSimpleName();
     private Activity mActivity;
@@ -87,27 +90,28 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     @Override
     public void onSuccess(HomeArticlesResponse response) {
 
-        // 请求完成，关闭刷新动画
-        if (mSwipeRefreshLayout.isRefreshing()) {
-            mSwipeRefreshLayout.setRefreshing(false);
-        }
+        closeSwipeRefresh();
 
         if (response.data.datas != null && response.data.datas.size() != 0) {
             mArticlesAdapter.addItems(response.data.datas);
         }
+
+        showContentView();
     }
 
     @Override
     public void onError(Throwable e) {
         Log.e(TAG, "onError: " + e.getMessage());
+        closeSwipeRefresh();
+        showErrorView();
     }
 
     private void init() {
         mLayoutManager = new LinearLayoutManager(mActivity);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mContentView.setLayoutManager(mLayoutManager);
 
         mArticlesAdapter = new HomeArticlesAdapter(mActivity);
-        mRecyclerView.setAdapter(mArticlesAdapter);
+        mContentView.setAdapter(mArticlesAdapter);
 
         // 设置下拉刷新动画的颜色
         mSwipeRefreshLayout.setColorSchemeColors(Color.RED, Color.YELLOW, Color.GREEN,
@@ -121,7 +125,7 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
         });
 
         // RecyclerView滚动事件监听
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mContentView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -134,5 +138,31 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
                 }
             }
         });
+    }
+
+    /**
+     * 网络连接失败时显示错误提示页面
+     */
+    private void showErrorView() {
+        mNetworkFailView.setVisibility(View.VISIBLE);
+        mContentView.setVisibility(View.GONE);
+        Log.e(TAG, "showErrorView: ");
+    }
+
+    /**
+     * 网络正常时显示页面内容
+     */
+    private void showContentView() {
+        mNetworkFailView.setVisibility(View.GONE);
+        mContentView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * 关闭下拉刷新动画
+     */
+    private void closeSwipeRefresh() {
+        if (mSwipeRefreshLayout.isRefreshing()) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 }
