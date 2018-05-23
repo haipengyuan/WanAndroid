@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.yhp.wanandroid.R;
@@ -23,6 +24,10 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapte
 
     private Context mContext;
 
+    private OnItemClickListener mOnItemClickListener;
+
+    private OnItemChildClickListener mOnItemChildClickListener;
+
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.article_author)
@@ -33,6 +38,8 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapte
         TextView title;
         @BindView(R.id.article_category)
         TextView category;
+        @BindView(R.id.relative_layout)
+        RelativeLayout relativeLayout;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -53,12 +60,30 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         Datas datas = mDatasList.get(position);
         holder.author.setText(mContext.getResources().getString(R.string.author_prefix) + datas.author);
         holder.date.setText(datas.niceDate);
         holder.title.setText(datas.title);
         holder.category.setText(datas.chapterName);
+
+        if (mOnItemClickListener != null) {
+            holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mOnItemClickListener.onClick(position);
+                }
+            });
+        }
+
+        if (mOnItemChildClickListener != null) {
+            holder.category.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mOnItemChildClickListener.onClick(view, position);
+                }
+            });
+        }
     }
 
     @Override
@@ -81,5 +106,25 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapte
     public void clear() {
         mDatasList.clear();
         notifyDataSetChanged();
+    }
+
+    public Datas getItem(int position) {
+        return mDatasList.get(position);
+    }
+
+    public interface OnItemClickListener {
+        void onClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mOnItemClickListener = listener;
+    }
+
+    public interface OnItemChildClickListener {
+        void onClick(View view, int position);
+    }
+
+    public void setOnItemChildClickListener(OnItemChildClickListener listener) {
+        mOnItemChildClickListener = listener;
     }
 }

@@ -2,6 +2,7 @@ package com.yhp.wanandroid.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,11 +15,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.yhp.wanandroid.R;
 import com.yhp.wanandroid.bean.HomeArticlesResponse;
+import com.yhp.wanandroid.constant.Constant;
 import com.yhp.wanandroid.mvp.contract.HomepageContract;
 import com.yhp.wanandroid.mvp.presenter.HomepagePresenter;
+import com.yhp.wanandroid.ui.activity.ArticleContentActivity;
 import com.yhp.wanandroid.ui.adapter.HomeArticlesAdapter;
 
 import butterknife.BindView;
@@ -80,8 +84,7 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     }
 
     @Override
-    public void setPresenter(HomepageContract.Presenter presenter) {
-    }
+    public void setPresenter(HomepageContract.Presenter presenter) {}
 
     public void loadArticles(int page) {
         mPresenter.getHomeArticles(page);
@@ -135,6 +138,27 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
                         == mArticlesAdapter.getItemCount() - 1) {
                     mSwipeRefreshLayout.setRefreshing(true);
                     loadArticles(mArticlesAdapter.getItemCount() / 20);
+                }
+            }
+        });
+
+        // RecyclerView的item项的点击事件
+        mArticlesAdapter.setOnItemClickListener(new HomeArticlesAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(int position) {
+                Log.e(TAG, mArticlesAdapter.getItem(position).link);
+                Intent intent = new Intent(mActivity, ArticleContentActivity.class);
+                intent.putExtra(Constant.CONTENT_URL_KEY, mArticlesAdapter.getItem(position).link);
+                startActivity(intent);
+
+            }
+        });
+
+        mArticlesAdapter.setOnItemChildClickListener(new HomeArticlesAdapter.OnItemChildClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                if (view.getId() == R.id.article_category) {
+                    Log.e(TAG, mArticlesAdapter.getItem(position).chapterName);
                 }
             }
         });

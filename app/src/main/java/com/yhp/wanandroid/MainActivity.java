@@ -14,13 +14,14 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.yhp.wanandroid.base.BaseActivity;
 import com.yhp.wanandroid.ui.fragment.CategoryFragment;
 import com.yhp.wanandroid.ui.fragment.HomeFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -40,11 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private long firstClickTime;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        ButterKnife.bind(this);
 
         init();
 
@@ -54,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
             // 默认显示HomeFragment
             showFragment(FRAGMENT_HOME);
         }
+    }
+
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_main;
     }
 
     @Override
