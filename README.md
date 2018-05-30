@@ -9,3 +9,4 @@
 * [Gson](https://github.com/google/gson)
 * [AgentWeb](https://github.com/Justson/AgentWeb)
 * [Banner](https://github.com/youth5201314/banner)
+* [Glide](https://github.com/bumptech/glide)

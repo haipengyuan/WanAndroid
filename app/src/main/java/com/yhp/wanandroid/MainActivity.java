@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -19,7 +18,6 @@ import com.yhp.wanandroid.ui.fragment.CategoryFragment;
 import com.yhp.wanandroid.ui.fragment.HomeFragment;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity {
 
@@ -44,7 +42,7 @@ public class MainActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        init();
+        initView();
 
         if (savedInstanceState != null) {
 
@@ -90,11 +88,13 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void init() {
+    private void initView() {
         setSupportActionBar(mToolbar);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         // 点击ToolBar左侧返回按钮打开关闭DrawerLayout
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(
