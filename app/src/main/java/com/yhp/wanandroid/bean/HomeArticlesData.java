@@ -2,7 +2,7 @@ package com.yhp.wanandroid.bean;
 
 import java.util.List;
 
-public class Data {
+public class HomeArticlesData {
     /**
      * curPage : 2
      * datas:{}
@@ -14,7 +14,7 @@ public class Data {
      */
 
     public int curPage;
-    public List<Datas> datas;
+    public List<ArticleDatas> datas;
     public int offset;
     public boolean over;
     public int pageCount;
@@ -23,7 +23,7 @@ public class Data {
 
     @Override
     public String toString() {
-        return "Data{" +
+        return "HomeArticlesData{" +
                 "curPage=" + curPage +
                 ", datas.size=" + datas.size() +
                 ", offset=" + offset +

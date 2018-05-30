@@ -3,49 +3,39 @@ package com.yhp.wanandroid.ui.adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+
 
 import com.yhp.wanandroid.R;
-import com.yhp.wanandroid.bean.Datas;
+import com.yhp.wanandroid.bean.ArticleDatas;
+import com.yhp.wanandroid.ui.adapter.viewholder.BannerViewHolder;
+import com.yhp.wanandroid.ui.adapter.viewholder.HomeArticlesViewHolder;
+import com.yhp.wanandroid.util.GlideImageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapter.ViewHolder> {
+public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Datas> mDatasList = new ArrayList<>();
+    private static final int TYPE_BANNER = 100;
+    private static final int LIST_FIRST_POSITION = 0;
+
+    private List<ArticleDatas> mDatasList = new ArrayList<>();
+    private List<String> mImages = new ArrayList<>();
 
     private Context mContext;
+
+    private View mHeaderView;
 
     private OnItemClickListener mOnItemClickListener;
 
     private OnItemChildClickListener mOnItemChildClickListener;
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
-
-        @BindView(R.id.article_author)
-        TextView author;
-        @BindView(R.id.article_date)
-        TextView date;
-        @BindView(R.id.article_title)
-        TextView title;
-        @BindView(R.id.article_category)
-        TextView category;
-        @BindView(R.id.relative_layout)
-        RelativeLayout relativeLayout;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-        }
-    }
+    private BannerViewHolder mBannerViewHolder;
 
     public HomeArticlesAdapter(Context context) {
         this.mContext = context;
@@ -53,42 +43,74 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapte
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (mHeaderView != null && viewType == TYPE_BANNER) {
+            mBannerViewHolder = new BannerViewHolder(mHeaderView);
+            return mBannerViewHolder;
+        }
+
+        View view = LayoutInflater.from(mContext)
                 .inflate(R.layout.item_home_article, parent, false);
-        return new ViewHolder(view);
+        return new HomeArticlesViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-        Datas datas = mDatasList.get(position);
-        holder.author.setText(mContext.getResources().getString(R.string.author_prefix) + datas.author);
-        holder.date.setText(datas.niceDate);
-        holder.title.setText(datas.title);
-        holder.category.setText(datas.chapterName);
-
-        if (mOnItemClickListener != null) {
-            holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mOnItemClickListener.onClick(position);
-                }
-            });
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, final int position) {
+        if (getItemViewType(position) == TYPE_BANNER) {
+            return;
         }
 
-        if (mOnItemChildClickListener != null) {
-            holder.category.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mOnItemChildClickListener.onClick(view, position);
-                }
-            });
+        final int pos = mHeaderView == null ? viewHolder.getLayoutPosition()
+                : viewHolder.getLayoutPosition() - 1;
+        if (viewHolder instanceof HomeArticlesViewHolder) {
+            HomeArticlesViewHolder holder = (HomeArticlesViewHolder) viewHolder;
+            ArticleDatas value = mDatasList.get(pos);
+            holder.author.setText(mContext.getResources().getString(R.string.author_prefix) + value.author);
+            holder.date.setText(value.niceDate);
+            holder.title.setText(value.title);
+            holder.category.setText(value.chapterName);
+
+            if (mOnItemClickListener != null) {
+                holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mOnItemClickListener.onClick(pos);
+                    }
+                });
+            }
+
+            if (mOnItemChildClickListener != null) {
+                holder.category.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mOnItemChildClickListener.onClick(view, pos);
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == LIST_FIRST_POSITION) {
+            return TYPE_BANNER;
+        } else {
+            return super.getItemViewType(position);
         }
     }
 
     @Override
     public int getItemCount() {
-        return mDatasList.size();
+        return mHeaderView == null ? mDatasList.size() : mDatasList.size() + 1;
+    }
+
+    public void setHeaderView(View headerView) {
+        mHeaderView = headerView;
+        notifyItemInserted(0);
+    }
+
+    public View getHeaderView() {
+        return mHeaderView;
     }
 
     /**
@@ -98,6 +120,7 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapte
     public void addItems(List list) {
         mDatasList.addAll(list);
         notifyItemRangeInserted(mDatasList.size(), list.size());
+        notifyDataSetChanged();
     }
 
     /**
@@ -108,20 +131,31 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<HomeArticlesAdapte
         notifyDataSetChanged();
     }
 
-    public Datas getItem(int position) {
+    public ArticleDatas getItem(int position) {
         return mDatasList.get(position);
     }
 
+/*    public void setBannerImages(List<String> images) {
+        mImages = images;
+        mBannerViewHolder.banner.update(mImages);
+    }*/
+
+    /**
+     * Item项点击事件监听器
+     */
     public interface OnItemClickListener {
         void onClick(int position);
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        mOnItemClickListener = listener;
-    }
-
+    /**
+     * Item项的子控件点击事件监听器
+     */
     public interface OnItemChildClickListener {
         void onClick(View view, int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mOnItemClickListener = listener;
     }
 
     public void setOnItemChildClickListener(OnItemChildClickListener listener) {

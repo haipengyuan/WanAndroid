@@ -1,1 +1,11 @@
 # WanAndroid
+## Dependencies
+* MaterialDesign
+* BottomNavigationView
+* [ButterKnife](https://github.com/JakeWharton/butterknife)
+* [RxJava2](https://github.com/ReactiveX/RxJava)
+* [Retrofit](https://github.com/square/retrofit)
+* [OkHttp](https://github.com/square/okhttp)
+* [Gson](https://github.com/google/gson)
+* [AgentWeb](https://github.com/Justson/AgentWeb)
+* [Banner](https://github.com/youth5201314/banner)

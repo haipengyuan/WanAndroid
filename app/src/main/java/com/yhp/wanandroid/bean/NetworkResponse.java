@@ -1,7 +1,7 @@
 package com.yhp.wanandroid.bean;
 
-public class HomeArticlesResponse {
-    public Data data;
+public class NetworkResponse<T> {
+    public T data;
     public int errorCode;
     public String errorMsg;
 }

@@ -1,6 +1,10 @@
 package com.yhp.wanandroid.network;
 
-import com.yhp.wanandroid.bean.HomeArticlesResponse;
+import com.yhp.wanandroid.bean.HomeArticlesData;
+import com.yhp.wanandroid.bean.HomeBannerData;
+import com.yhp.wanandroid.bean.NetworkResponse;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
@@ -16,8 +20,14 @@ public interface HomepageService {
      * @return
      */
     @GET("article/list/{page}/json")
-    Observable<HomeArticlesResponse> getHomepageArticles(@Path("page") int page);
+    Observable<NetworkResponse<HomeArticlesData>> getHomepageArticles(@Path("page") int page);
 
-
+    /**
+     * 首页banner
+     * http://www.wanandroid.com/banner/json
+     * @return
+     */
+    @GET("banner/json")
+    Observable<NetworkResponse<List<HomeBannerData>>> getBanner();
 
 }

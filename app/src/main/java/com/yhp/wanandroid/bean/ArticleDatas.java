@@ -2,7 +2,7 @@ package com.yhp.wanandroid.bean;
 
 import java.util.List;
 
-public class Datas {
+public class ArticleDatas {
 
     /**
      * apkLink :
@@ -66,7 +66,7 @@ public class Datas {
 
     @Override
     public String toString() {
-        return "Datas{" +
+        return "ArticleDatas{" +
                 "author='" + author + '\'' +
                 ", chapterName='" + chapterName + '\'' +
                 ", desc='" + desc + '\'' +
