@@ -3,9 +3,9 @@ package com.yhp.wanandroid.base;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.transition.Transition;
-import android.support.transition.TransitionInflater;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
 import android.view.Window;
 
 import butterknife.ButterKnife;
@@ -16,8 +16,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
- /*       getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        Transition transition = TransitionInflater.from(this).inflateTransition(android.R.transition.slide_left);
+/*        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        Transition transition = TransitionInflater.from(this)
+                .inflateTransition(android.R.transition.slide_right);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setEnterTransition(transition);
             getWindow().setExitTransition(transition);

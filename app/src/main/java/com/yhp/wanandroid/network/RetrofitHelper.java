@@ -25,9 +25,9 @@ public class RetrofitHelper {
                             Log.i(TAG, message);
                         }
                     }).setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(5, TimeUnit.SECONDS)
+                    .writeTimeout(5, TimeUnit.SECONDS)
                     .build())
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -35,6 +35,14 @@ public class RetrofitHelper {
 
     public static HomepageService createHomepageService() {
         return retrofit.create(HomepageService.class);
+    }
+
+    public static CategoryService createCategoryService() {
+        return retrofit.create(CategoryService.class);
+    }
+
+    public static CategoryArticlesService createCategoryArticlesService() {
+        return retrofit.create(CategoryArticlesService.class);
     }
 
 }

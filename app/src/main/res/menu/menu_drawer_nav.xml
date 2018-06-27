@@ -6,6 +6,11 @@
         android:title="@string/my_star"/>
 
     <item
+        android:id="@+id/nav_setting"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="@string/setting" />
+
+    <item
         android:id="@+id/nav_about_us"
         android:icon="@drawable/ic_about_us"
         android:title="@string/about_us"/>

@@ -1,12 +1,17 @@
 package com.yhp.wanandroid.ui.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.transition.Transition;
+import android.support.transition.TransitionInflater;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,8 +20,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.RelativeLayout;
-
 import com.yhp.wanandroid.R;
 import com.yhp.wanandroid.bean.HomeArticlesData;
 import com.yhp.wanandroid.bean.HomeBannerData;
@@ -49,6 +55,12 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.network_fail_layout)
     RelativeLayout mNetworkFailView;
+    @BindView(R.id.fab)
+    FloatingActionButton mFAB;
+    @BindView(R.id.retry_btn)
+    Button mRetryBtn;
+    @BindView(R.id.loading_layout)
+    RelativeLayout mLoadingLayout;
 
     private static final String TAG = HomeFragment.class.getSimpleName();
 
@@ -78,6 +90,7 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
         ButterKnife.bind(this, view);
 
         initView();
+        showLoadingView();
 
         return view;
     }
@@ -106,11 +119,6 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    @Override
     public void setPresenter(HomepageContract.Presenter presenter) {}
 
     /**
@@ -136,6 +144,7 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     public void onArticlesError(Throwable e) {
         Log.e(TAG, "onError: " + e.getMessage());
         closeSwipeRefresh();
+
         showErrorView();
     }
 
@@ -201,6 +210,11 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+                // 当位于RecyclerView顶部的时候隐藏FAB，位于其他位置显示FAB
+                mFAB.setVisibility(mLayoutManager.findFirstVisibleItemPosition() > 0
+                        ? View.VISIBLE : View.GONE);
+
                 // 滑动到最后一项时加载数据
                 if (!mSwipeRefreshLayout.isRefreshing()
                         && mLayoutManager.findLastVisibleItemPosition()
@@ -213,13 +227,15 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
 
         // RecyclerView的item项的点击事件
         mArticlesAdapter.setOnItemClickListener(new HomeArticlesAdapter.OnItemClickListener() {
+            @SuppressLint("NewApi")
             @Override
             public void onClick(int position) {
                 Log.e(TAG, mArticlesAdapter.getItem(position).link);
                 Intent intent = new Intent(mActivity, ArticleContentActivity.class);
                 intent.putExtra(Constant.CONTENT_URL_KEY, mArticlesAdapter.getItem(position).link);
                 startActivity(intent);
-
+                mActivity.overridePendingTransition(R.anim.activity_translate_enter,
+                        R.anim.activity_translate_exit);
             }
         });
 
@@ -232,6 +248,22 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
                 }
             }
         });
+
+        mFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 返回顶部
+                mContentView.smoothScrollToPosition(0);
+            }
+        });
+
+        mRetryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mArticlesAdapter.clear();
+                loadArticles(0);
+            }
+        });
     }
 
     /**
@@ -240,7 +272,7 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     private void showErrorView() {
         mNetworkFailView.setVisibility(View.VISIBLE);
         mContentView.setVisibility(View.GONE);
-        Log.e(TAG, "showErrorView: ");
+        mLoadingLayout.setVisibility(View.GONE);
     }
 
     /**
@@ -249,6 +281,16 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     private void showContentView() {
         mNetworkFailView.setVisibility(View.GONE);
         mContentView.setVisibility(View.VISIBLE);
+        mLoadingLayout.setVisibility(View.GONE);
+    }
+
+    /**
+     * 数据加载时显示加载页面
+     */
+    private void showLoadingView() {
+        mNetworkFailView.setVisibility(View.GONE);
+        mContentView.setVisibility(View.GONE);
+        mLoadingLayout.setVisibility(View.VISIBLE);
     }
 
     /**

@@ -90,7 +90,6 @@ public class MainActivity extends BaseActivity {
 
     private void initView() {
         setSupportActionBar(mToolbar);
-
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -112,9 +111,11 @@ public class MainActivity extends BaseActivity {
                 switch (item.getItemId()) {
                     case R.id.menu_item_home:
                         showFragment(FRAGMENT_HOME);
+                        mToolbar.setTitle(getResources().getString(R.string.app_name));
                         break;
                     case R.id.menu_item_category:
                         showFragment(FRAGMENT_CATEGORY);
+                        mToolbar.setTitle(getResources().getString(R.string.nav_category));
                         break;
                 }
                 return true;

@@ -25,7 +25,6 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final int LIST_FIRST_POSITION = 0;
 
     private List<ArticleDatas> mDatasList = new ArrayList<>();
-    private List<String> mImages = new ArrayList<>();
 
     private Context mContext;
 
