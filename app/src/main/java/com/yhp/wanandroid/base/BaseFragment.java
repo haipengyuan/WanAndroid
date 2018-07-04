@@ -40,8 +40,14 @@ public abstract class BaseFragment extends Fragment {
      */
     protected abstract int setLayoutResourceID();
 
+    /**
+     * 初始化控件
+     */
     protected abstract void initView();
 
+    /**
+     * 初始化数据
+     */
     protected abstract void initData();
 
     public Activity getMActivity() {

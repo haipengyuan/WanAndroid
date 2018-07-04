@@ -2,6 +2,7 @@ package com.yhp.wanandroid.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,10 +16,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.yhp.wanandroid.R;
+import com.yhp.wanandroid.base.BaseFragment;
 import com.yhp.wanandroid.bean.CategoryData;
 import com.yhp.wanandroid.bean.NetworkResponse;
+import com.yhp.wanandroid.constant.Constant;
 import com.yhp.wanandroid.mvp.contract.CategoryContract;
 import com.yhp.wanandroid.mvp.presenter.CategoryPresenter;
+import com.yhp.wanandroid.ui.activity.CategoryDetailActivity;
 import com.yhp.wanandroid.ui.adapter.CategoryAdapter;
 
 import java.util.ArrayList;
@@ -30,7 +34,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class CategoryFragment extends Fragment implements CategoryContract.View {
+/**
+ * 体系Fragment
+ * 显示知识体系分类
+ */
+public class CategoryFragment extends BaseFragment implements CategoryContract.View {
 
     @BindView(R.id.category_recycler_view)
     RecyclerView mCategoryView;
@@ -39,21 +47,47 @@ public class CategoryFragment extends Fragment implements CategoryContract.View 
     @BindView(R.id.loading_layout)
     RelativeLayout mLoadingView;
 
+    /**
+     * 数据请求成功
+     */
     private static final int STATE_SUCCESS = 593;
+
+    /**
+     * 数据请求失败
+     */
     private static final int STATE_FAIL = 759;
+
+    /**
+     * 正在加载
+     */
     private static final int STATE_LOADING = 719;
 
-    private Activity mActivity;
+    /**
+     * 状态标志
+     * STATE_SUCCESS, STATE_FAIL, STATE_LOADING
+     */
+    private int mState;
 
     private CategoryPresenter mPresenter = new CategoryPresenter(this);
     private CategoryAdapter mCategoryAdapter;
     private LinearLayoutManager mLayoutManager;
 
+    /**
+     * 知识体系一级标题列表
+     */
     private List<String> mFirstTitleList = new ArrayList<>();
-    private Map<String, List<String>> mSecondaryTitleMap = new HashMap<>();
-    private Map<String, ArrayList<Integer>> mSecondaryIDMap = new HashMap<>();
 
-    private int mState;
+    /**
+     * 知识体系二级标题
+     * key为一级标题，value为二级标题列表
+     */
+    private Map<String, List<String>> mSecondaryTitleMap = new HashMap<>();
+
+    /**
+     * 知识体系二级标题的id值
+     * key为一级标题，value为二级标题id列表
+     */
+    private Map<String, ArrayList<Integer>> mSecondaryIDMap = new HashMap<>();
 
     public static CategoryFragment newInstance() {
         CategoryFragment fragment = new CategoryFragment();
@@ -63,27 +97,14 @@ public class CategoryFragment extends Fragment implements CategoryContract.View 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mActivity = (Activity) context;
         mState = STATE_LOADING;
     }
 
-     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_category, container, false);
-        ButterKnife.bind(this, view);
-
-        initView();
-        refreshView();
-
-        return view;
-    }
-
-    @Override
+/*    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         loadCategory();
-    }
+    }*/
 
     @Override
     public void onCategorySuccess(NetworkResponse<List<CategoryData>> response) {
@@ -112,11 +133,6 @@ public class CategoryFragment extends Fragment implements CategoryContract.View 
 
     @Override
     public void onCategoryError(Throwable e) {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
         mState = STATE_FAIL;
         refreshView();
     }
@@ -124,16 +140,67 @@ public class CategoryFragment extends Fragment implements CategoryContract.View 
     @Override
     public void setPresenter(CategoryContract.Presenter presenter) {}
 
+    @Override
+    protected int setLayoutResourceID() {
+        return R.layout.fragment_category;
+    }
+
+    @Override
+    protected void initView() {
+        mLayoutManager = new LinearLayoutManager(getMActivity());
+        mCategoryView.setLayoutManager(mLayoutManager);
+
+        mCategoryAdapter = new CategoryAdapter(getMActivity());
+        mCategoryView.setAdapter(mCategoryAdapter);
+
+        mCategoryAdapter.setOnItemClickListener(new CategoryAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(int position) {
+                String firstTitle = mFirstTitleList.get(position);
+                List<String> secondaryTitleList = mSecondaryTitleMap.get(firstTitle);
+                ArrayList<Integer> secondaryIDList = mSecondaryIDMap.get(firstTitle);
+
+                Intent intent = new Intent(getMActivity(), CategoryDetailActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString(Constant.ARG_FIRST_TITLE, firstTitle);
+                bundle.putStringArray(Constant.ARG_SECONDARY_TITLE,
+                        secondaryTitleList.toArray(new String[secondaryTitleList.size()]));
+                bundle.putIntegerArrayList(Constant.CATEGORY_ID_LIST, secondaryIDList);
+                intent.putExtras(bundle);
+                getMActivity().startActivity(intent);
+            }
+        });
+
+        refreshView();
+    }
+
+    @Override
+    protected void initData() {
+        loadCategory();
+    }
+
+    /**
+     * 加载知识体系分类数据
+     */
     private void loadCategory() {
         mPresenter.getCategory();
     }
 
-    private void initView() {
-        mLayoutManager = new LinearLayoutManager(mActivity);
-        mCategoryView.setLayoutManager(mLayoutManager);
+    /**
+     * 根据当前的状态显示对应的页面
+     */
+    private void refreshView() {
+        if (mCategoryView != null) {
+            mCategoryView.setVisibility(mState == STATE_SUCCESS ? View.VISIBLE : View.GONE);
+        }
 
-        mCategoryAdapter = new CategoryAdapter(mActivity);
-        mCategoryView.setAdapter(mCategoryAdapter);
+        if (mNetworkFailView != null) {
+            mNetworkFailView.setVisibility(mState == STATE_FAIL ? View.VISIBLE : View.GONE);
+        }
+
+        if (mLoadingView != null) {
+            mLoadingView.setVisibility(mState == STATE_LOADING ? View.VISIBLE : View.GONE);
+        }
     }
 
     /**
@@ -154,23 +221,12 @@ public class CategoryFragment extends Fragment implements CategoryContract.View 
         mLoadingView.setVisibility(View.GONE);
     }
 
+    /**
+     * 请求数据时显示加载页面
+     */
     private void showLoadingView() {
         mCategoryView.setVisibility(View.GONE);
         mNetworkFailView.setVisibility(View.GONE);
         mLoadingView.setVisibility(View.VISIBLE);
-    }
-
-    private void refreshView() {
-        if (mCategoryView != null) {
-            mCategoryView.setVisibility(mState == STATE_SUCCESS ? View.VISIBLE : View.GONE);
-        }
-
-        if (mNetworkFailView != null) {
-            mNetworkFailView.setVisibility(mState == STATE_FAIL ? View.VISIBLE : View.GONE);
-        }
-
-        if (mLoadingView != null) {
-            mLoadingView.setVisibility(mState == STATE_LOADING ? View.VISIBLE : View.GONE);
-        }
     }
 }

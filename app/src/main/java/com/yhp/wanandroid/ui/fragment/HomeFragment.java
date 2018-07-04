@@ -24,6 +24,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import com.yhp.wanandroid.R;
+import com.yhp.wanandroid.base.BaseFragment;
 import com.yhp.wanandroid.bean.HomeArticlesData;
 import com.yhp.wanandroid.bean.HomeBannerData;
 import com.yhp.wanandroid.bean.NetworkResponse;
@@ -47,7 +48,7 @@ import butterknife.ButterKnife;
  * 主页Fragment
  * 显示轮播图和主页文章列表
  */
-public class HomeFragment extends Fragment implements HomepageContract.View {
+public class HomeFragment extends BaseFragment implements HomepageContract.View {
 
     @BindView(R.id.content_recycler_view)
     RecyclerView mContentView;
@@ -64,11 +65,13 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
 
     private static final String TAG = HomeFragment.class.getSimpleName();
 
-    private Activity mActivity;
-
     private HomepagePresenter mPresenter = new HomepagePresenter(this);
     private HomeArticlesAdapter mArticlesAdapter;
     private LinearLayoutManager mLayoutManager;
+
+    /**
+     * 轮播图控件
+     */
     private Banner mBanner;
 
     private List<String> mBannerImages = new ArrayList<>();
@@ -78,29 +81,119 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mActivity = (Activity) context;
+    protected int setLayoutResourceID() {
+        return R.layout.fragment_home;
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
-        ButterKnife.bind(this, view);
+    protected void initView() {
+        mLayoutManager = new LinearLayoutManager(getMActivity());
+        mContentView.setLayoutManager(mLayoutManager);
 
-        initView();
+        View header = LayoutInflater.from(getMActivity()).inflate(R.layout.home_header_banner, mContentView, false);
+        mBanner = header.findViewById(R.id.home_banner);
+        mBanner.setImageLoader(new GlideImageLoader());
+        // 设置轮播间隔时间
+        mBanner.setDelayTime(4000);
+        mBanner.setOnBannerListener(new OnBannerListener() {
+            @Override
+            public void OnBannerClick(int position) {
+                Log.e(TAG, "OnBannerClick: " + position);
+            }
+        });
+
+        mArticlesAdapter = new HomeArticlesAdapter(getMActivity());
+        mArticlesAdapter.setHeaderView(header);
+
+        mContentView.setAdapter(mArticlesAdapter);
+
+        // 设置下拉刷新动画的颜色
+        mSwipeRefreshLayout.setColorSchemeColors(Color.RED, Color.YELLOW, Color.GREEN,
+                Color.CYAN, Color.BLUE, Color.MAGENTA);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mArticlesAdapter.clear();
+                loadArticles(0);
+            }
+        });
+
+        // RecyclerView滚动事件监听
+        mContentView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                // 当位于RecyclerView顶部的时候隐藏FAB，位于其他位置显示FAB
+                mFAB.setVisibility(mLayoutManager.findFirstVisibleItemPosition() > 0
+                        ? View.VISIBLE : View.GONE);
+
+                // 滑动到最后一项时加载数据
+                if (!mSwipeRefreshLayout.isRefreshing()
+                        && mLayoutManager.findLastVisibleItemPosition()
+                        == mArticlesAdapter.getItemCount() - 1) {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    loadArticles(mArticlesAdapter.getItemCount() / 20);
+                }
+            }
+        });
+
+        // RecyclerView的item项的点击事件
+        mArticlesAdapter.setOnItemClickListener(new HomeArticlesAdapter.OnItemClickListener() {
+            @SuppressLint("NewApi")
+            @Override
+            public void onClick(int position) {
+                Log.e(TAG, mArticlesAdapter.getItem(position).link);
+                Intent intent = new Intent(getMActivity(), ArticleContentActivity.class);
+                intent.putExtra(Constant.CONTENT_URL_KEY, mArticlesAdapter.getItem(position).link);
+                startActivity(intent);
+                getMActivity().overridePendingTransition(R.anim.activity_translate_enter,
+                        R.anim.activity_translate_exit);
+            }
+        });
+
+        // RecyclerView的item项子控件的点击事件
+        mArticlesAdapter.setOnItemChildClickListener(new HomeArticlesAdapter.OnItemChildClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                if (view.getId() == R.id.article_category) {
+                    Log.e(TAG, mArticlesAdapter.getItem(position).chapterName);
+                }
+            }
+        });
+
+        mFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 返回顶部
+                mContentView.smoothScrollToPosition(0);
+            }
+        });
+
+        mRetryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mArticlesAdapter.clear();
+                loadArticles(0);
+            }
+        });
+
         showLoadingView();
-
-        return view;
     }
 
     @Override
+    protected void initData() {
+        loadBanner();
+        loadArticles(0);
+    }
+
+/*    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         loadBanner();
         loadArticles(0);
-    }
+    }*/
 
     @Override
     public void onStart() {
@@ -167,103 +260,6 @@ public class HomeFragment extends Fragment implements HomepageContract.View {
     @Override
     public void onBannerError(Throwable e) {
         Log.e(TAG, "onError: " + e.getMessage());
-    }
-
-    /**
-     * 初始化控件
-     */
-    private void initView() {
-        mLayoutManager = new LinearLayoutManager(mActivity);
-        mContentView.setLayoutManager(mLayoutManager);
-
-        View header = LayoutInflater.from(mActivity).inflate(R.layout.home_header_banner, mContentView, false);
-        mBanner = header.findViewById(R.id.home_banner);
-        mBanner.setImageLoader(new GlideImageLoader());
-        // 设置轮播间隔时间
-        mBanner.setDelayTime(4000);
-        mBanner.setOnBannerListener(new OnBannerListener() {
-            @Override
-            public void OnBannerClick(int position) {
-                Log.e(TAG, "OnBannerClick: " + position);
-            }
-        });
-
-        mArticlesAdapter = new HomeArticlesAdapter(mActivity);
-        mArticlesAdapter.setHeaderView(header);
-
-        mContentView.setAdapter(mArticlesAdapter);
-
-        // 设置下拉刷新动画的颜色
-        mSwipeRefreshLayout.setColorSchemeColors(Color.RED, Color.YELLOW, Color.GREEN,
-                Color.CYAN, Color.BLUE, Color.MAGENTA);
-
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                mArticlesAdapter.clear();
-                loadArticles(0);
-            }
-        });
-
-        // RecyclerView滚动事件监听
-        mContentView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                // 当位于RecyclerView顶部的时候隐藏FAB，位于其他位置显示FAB
-                mFAB.setVisibility(mLayoutManager.findFirstVisibleItemPosition() > 0
-                        ? View.VISIBLE : View.GONE);
-
-                // 滑动到最后一项时加载数据
-                if (!mSwipeRefreshLayout.isRefreshing()
-                        && mLayoutManager.findLastVisibleItemPosition()
-                        == mArticlesAdapter.getItemCount() - 1) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                    loadArticles(mArticlesAdapter.getItemCount() / 20);
-                }
-            }
-        });
-
-        // RecyclerView的item项的点击事件
-        mArticlesAdapter.setOnItemClickListener(new HomeArticlesAdapter.OnItemClickListener() {
-            @SuppressLint("NewApi")
-            @Override
-            public void onClick(int position) {
-                Log.e(TAG, mArticlesAdapter.getItem(position).link);
-                Intent intent = new Intent(mActivity, ArticleContentActivity.class);
-                intent.putExtra(Constant.CONTENT_URL_KEY, mArticlesAdapter.getItem(position).link);
-                startActivity(intent);
-                mActivity.overridePendingTransition(R.anim.activity_translate_enter,
-                        R.anim.activity_translate_exit);
-            }
-        });
-
-        // RecyclerView的item项子控件的点击事件
-        mArticlesAdapter.setOnItemChildClickListener(new HomeArticlesAdapter.OnItemChildClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                if (view.getId() == R.id.article_category) {
-                    Log.e(TAG, mArticlesAdapter.getItem(position).chapterName);
-                }
-            }
-        });
-
-        mFAB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // 返回顶部
-                mContentView.smoothScrollToPosition(0);
-            }
-        });
-
-        mRetryBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mArticlesAdapter.clear();
-                loadArticles(0);
-            }
-        });
     }
 
     /**

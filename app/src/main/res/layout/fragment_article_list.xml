@@ -18,6 +18,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fab_margin"
+        android:visibility="gone"
         android:src="@drawable/ic_return_top_48"
         app:elevation="@dimen/elevation_3" />
 </RelativeLayout>

@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.yhp.wanandroid.R;
@@ -34,7 +35,12 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
      */
     private Map<String, List<String>> mSecondaryTitleMap = new HashMap<>();
 
+    /**
+     * 二级标题id
+     */
     private Map<String, ArrayList<Integer>> mSecondaryIDMap = new HashMap<>();
+
+    private OnItemClickListener mOnItemClickListener;
 
     public CategoryAdapter(Context mContext) {
         this.mContext = mContext;
@@ -49,7 +55,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         final String firstTitle = mFirstTitleList.get(position);
         holder.firstTitle.setText(firstTitle);
 
@@ -58,7 +64,16 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         String secondaryTitle = titleListToString(secondaryTitleList);
         holder.secondaryTitle.setText(secondaryTitle);
 
-        holder.firstTitle.setOnClickListener(new View.OnClickListener() {
+        if (mOnItemClickListener != null) {
+            holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mOnItemClickListener.onClick(position);
+                }
+            });
+        }
+
+/*        holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, CategoryDetailActivity.class);
@@ -70,7 +85,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                 intent.putExtras(bundle);
                 mContext.startActivity(intent);
             }
-        });
+        });*/
     }
 
     @Override
@@ -80,11 +95,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
+        RelativeLayout relativeLayout;
         TextView firstTitle;
         TextView secondaryTitle;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            relativeLayout = itemView.findViewById(R.id.relative_layout);
             firstTitle = itemView.findViewById(R.id.first_title);
             secondaryTitle = itemView.findViewById(R.id.secondary_title);
         }
@@ -125,5 +142,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             }
         }
         return sb.toString();
+    }
+
+    public interface OnItemClickListener {
+        void onClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mOnItemClickListener = listener;
     }
 }
