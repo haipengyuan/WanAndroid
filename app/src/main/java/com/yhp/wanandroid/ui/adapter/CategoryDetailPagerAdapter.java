@@ -12,7 +12,7 @@ import java.util.List;
 
 public class CategoryDetailPagerAdapter extends FragmentStatePagerAdapter {
 
-    private List<ArticleListFragment> fragments = new ArrayList<>();
+    private List<ArticleListFragment> fragments;
 
     public CategoryDetailPagerAdapter(FragmentManager fm, List<ArticleListFragment> list) {
         super(fm);

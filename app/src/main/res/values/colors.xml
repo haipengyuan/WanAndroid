@@ -7,4 +7,5 @@
     <color name="bg_recycler">#e6e6e6</color>
     <color name="item_pressed">#d6d6d6</color>
     <color name="dividerGray">#EDEDED</color>
+    <color name="tabIndicator">#FF1493</color>
 </resources>

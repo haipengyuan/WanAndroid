@@ -31,7 +31,7 @@
         <activity
             android:name=".ui.activity.CategoryDetailActivity"
             android:label="@string/title_activity_category_detail"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

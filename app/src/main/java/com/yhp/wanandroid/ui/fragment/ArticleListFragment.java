@@ -1,6 +1,8 @@
 package com.yhp.wanandroid.ui.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -20,6 +22,7 @@ import com.yhp.wanandroid.bean.NetworkResponse;
 import com.yhp.wanandroid.constant.Constant;
 import com.yhp.wanandroid.mvp.contract.CategoryArticlesContract;
 import com.yhp.wanandroid.mvp.presenter.CategoryArticlesPresenter;
+import com.yhp.wanandroid.ui.activity.ArticleContentActivity;
 import com.yhp.wanandroid.ui.adapter.HomeArticlesAdapter;
 
 import butterknife.BindView;
@@ -110,6 +113,16 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
                     mSwipeRefreshLayout.setRefreshing(true);
                     loadArticles(mArticlesAdapter.getItemCount() / 20, cid);
                 }
+            }
+        });
+
+        mArticlesAdapter.setOnItemClickListener(new HomeArticlesAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(int position) {
+                Log.e(TAG, mArticlesAdapter.getItem(position).link);
+                Intent intent = new Intent(getMActivity(), ArticleContentActivity.class);
+                intent.putExtra(Constant.CONTENT_URL_KEY, mArticlesAdapter.getItem(position).link);
+                startActivity(intent);
             }
         });
 

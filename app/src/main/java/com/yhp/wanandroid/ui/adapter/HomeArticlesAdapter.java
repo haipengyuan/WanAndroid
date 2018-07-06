@@ -55,11 +55,11 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, final int position) {
-        if (getItemViewType(position) == TYPE_BANNER) {
+        if (getItemViewType(position) == TYPE_BANNER && mHeaderView != null) {
             return;
         }
 
-        final int pos = mHeaderView == null ? viewHolder.getLayoutPosition()
+        final int pos = (mHeaderView == null) ? viewHolder.getLayoutPosition()
                 : viewHolder.getLayoutPosition() - 1;
         if (viewHolder instanceof HomeArticlesViewHolder) {
             HomeArticlesViewHolder holder = (HomeArticlesViewHolder) viewHolder;
