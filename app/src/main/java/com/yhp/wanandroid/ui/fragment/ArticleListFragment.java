@@ -1,6 +1,5 @@
 package com.yhp.wanandroid.ui.fragment;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -24,6 +23,7 @@ import com.yhp.wanandroid.mvp.contract.CategoryArticlesContract;
 import com.yhp.wanandroid.mvp.presenter.CategoryArticlesPresenter;
 import com.yhp.wanandroid.ui.activity.ArticleContentActivity;
 import com.yhp.wanandroid.ui.adapter.HomeArticlesAdapter;
+import com.yhp.wanandroid.ui.listener.FooterRecyclerOnScrollListener;
 
 import butterknife.BindView;
 
@@ -52,6 +52,8 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
 
     private int cid;
 
+    private boolean firstStart;
+
     public static ArticleListFragment newInstance(int cid) {
         ArticleListFragment fragment = new ArticleListFragment();
         Bundle args = new Bundle();
@@ -69,6 +71,7 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        firstStart = true;
         loadArticles(Constant.PAGE_CODE_START, cid);
     }
 
@@ -81,7 +84,9 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
     protected void initView() {
         mLayoutManager = new LinearLayoutManager(getMActivity());
         mContentView.setLayoutManager(mLayoutManager);
-        mArticlesAdapter = new HomeArticlesAdapter(getMActivity());
+
+        // 设置categoryFlag为false，不显示分类信息
+        mArticlesAdapter = new HomeArticlesAdapter(getMActivity(), false);
         mContentView.setAdapter(mArticlesAdapter);
 
         // 设置下拉刷新动画的颜色
@@ -97,7 +102,7 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
         });
 
         // RecyclerView滚动事件监听
-        mContentView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+/*        mContentView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -107,12 +112,20 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
                         ? View.VISIBLE : View.GONE);
 
                 // 滑动到最后一项时加载数据
-                if (!mSwipeRefreshLayout.isRefreshing()
+                *//*if (!mSwipeRefreshLayout.isRefreshing()
                         && mLayoutManager.findLastVisibleItemPosition()
                         == mArticlesAdapter.getItemCount() - 1) {
                     mSwipeRefreshLayout.setRefreshing(true);
                     loadArticles(mArticlesAdapter.getItemCount() / 20, cid);
-                }
+                }*//*
+            }
+        });*/
+
+        mContentView.addOnScrollListener(new FooterRecyclerOnScrollListener() {
+            @Override
+            public void onLoadMore() {
+                mArticlesAdapter.setLoadState(HomeArticlesAdapter.LOADING);
+                loadArticles(mArticlesAdapter.getItemCount() / 20, cid);
             }
         });
 
@@ -139,6 +152,43 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
 
     @Override
     protected void initData() {}
+
+    @Override
+    public void onArticlesSuccess(NetworkResponse<HomeArticlesData> response) {
+        closeSwipeRefresh();
+
+        Log.e(TAG, "size: " + response.data.datas.size());
+
+        if (response.data != null && response.data.datas.size() != 0) {
+            mArticlesAdapter.setLoadState(HomeArticlesAdapter.LOADING_COMPLETE);
+            mArticlesAdapter.addItems(response.data.datas);
+        } else {
+            mArticlesAdapter.setLoadState(HomeArticlesAdapter.LOADING_NULL);
+        }
+
+        if (firstStart) {
+            showContentView();
+            firstStart = false;
+        }
+    }
+
+    @Override
+    public void onArticlesError(Throwable e) {
+        Log.e(TAG, "onError: " + e.getMessage());
+        closeSwipeRefresh();
+
+        showErrorView();
+    }
+
+    /**
+     * 请求获取文章
+     * @param page
+     * @param cid
+     */
+    private void loadArticles(int page, int cid) {
+        Log.e(TAG, "loadArticles");
+        mPresenter.getHomeArticles(page, cid);
+    }
 
     /**
      * 网络连接失败时显示错误提示页面
@@ -174,34 +224,6 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
         if (mSwipeRefreshLayout.isRefreshing()) {
             mSwipeRefreshLayout.setRefreshing(false);
         }
-    }
-
-    /**
-     * 请求获取文章
-     * @param page
-     * @param cid
-     */
-    private void loadArticles(int page, int cid) {
-        mPresenter.getHomeArticles(page, cid);
-    }
-
-    @Override
-    public void onArticlesSuccess(NetworkResponse<HomeArticlesData> response) {
-        closeSwipeRefresh();
-
-        if (response.data != null && response.data.datas.size() != 0) {
-            mArticlesAdapter.addItems(response.data.datas);
-        }
-
-        showContentView();
-    }
-
-    @Override
-    public void onArticlesError(Throwable e) {
-        Log.e(TAG, "onError: " + e.getMessage());
-        closeSwipeRefresh();
-
-        showErrorView();
     }
 
     @Override

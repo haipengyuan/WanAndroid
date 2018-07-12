@@ -1,5 +1,7 @@
 package com.yhp.wanandroid.mvp.presenter;
 
+import android.util.Log;
+
 import com.yhp.wanandroid.bean.HomeArticlesData;
 import com.yhp.wanandroid.bean.NetworkResponse;
 import com.yhp.wanandroid.mvp.contract.CategoryArticlesContract;
