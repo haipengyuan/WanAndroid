@@ -18,11 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * 文章列表适配器类
+ */
 public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-    private static final int LIST_FIRST_POSITION = 0;
-    private static final int TYPE_BANNER = 100;
-    private static final int TYPE_FOOTER = 101;
 
     /**
      * 正在加载
@@ -39,17 +38,37 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
      */
     public static final int LOADING_NULL = 202;
 
+    private static final int FIRST_POSITION = 0;
+
+    private static final int TYPE_HEADER = 100;
+    private static final int TYPE_FOOTER = 101;
+    private static final int TYPE_NORMAL = 102;
+
+    /**
+     * 当前加载状态，默认为加载完成
+     */
+    private int loadState = LOADING_COMPLETE;
+
+    /**
+     * 数据列表
+     */
     private List<ArticleDatas> mDatasList = new ArrayList<>();
 
     private Context mContext;
 
+    /**
+     * 头部视图（Banner）
+     */
     private View mHeaderView;
+
+    /**
+     * 尾部视图（正在加载）
+     */
+    private View mFooterView;
 
     private OnItemClickListener mOnItemClickListener;
 
     private OnItemChildClickListener mOnItemChildClickListener;
-
-    private BannerViewHolder mBannerViewHolder;
 
     /**
      * 标记分类信息是否显示
@@ -57,11 +76,6 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
      *    false：不显示
      */
     private boolean mCategoryFlag = true;
-
-    /**
-     * 当前加载状态，默认为加载完成
-     */
-    private int loadState = LOADING_COMPLETE;
 
     public HomeArticlesAdapter(Context context) {
         this.mContext = context;
@@ -79,13 +93,12 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (mHeaderView != null && viewType == TYPE_BANNER) {
-            mBannerViewHolder = new BannerViewHolder(mHeaderView);
-            return mBannerViewHolder;
-        } else if (viewType == TYPE_FOOTER) {
-            View view = LayoutInflater.from(mContext)
-                    .inflate(R.layout.refresh_footer, parent, false);
-            return new FooterViewHolder(view);
+        if (viewType == TYPE_HEADER) {
+            return new BannerViewHolder(mHeaderView);
+        }
+
+        if (viewType == TYPE_FOOTER) {
+            return new FooterViewHolder(mFooterView);
         }
 
         View view = LayoutInflater.from(mContext)
@@ -95,82 +108,93 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, final int position) {
-        if (getItemViewType(position) == TYPE_BANNER && mHeaderView != null) {
+        if (getItemViewType(position) == TYPE_HEADER) {
             return;
         }
 
-        final int pos = (mHeaderView == null) ? viewHolder.getLayoutPosition()
-                : viewHolder.getLayoutPosition() - 1;
-        if (viewHolder instanceof HomeArticlesViewHolder) {
-            HomeArticlesViewHolder holder = (HomeArticlesViewHolder) viewHolder;
-            if (mDatasList.size() > 0) {
-                ArticleDatas value = mDatasList.get(pos);
-                holder.author.setText(mContext.getResources().getString(R.string.author_prefix) + value.author);
-                holder.date.setText(value.niceDate);
-                holder.title.setText(value.title);
-                if (mCategoryFlag) {
-                    holder.category.setText(value.chapterName);
-                } else {
-                    // 不显示分类信息
-                    holder.category.setVisibility(View.GONE);
+        if (getItemViewType(position) == TYPE_NORMAL) {
+            if (viewHolder instanceof HomeArticlesViewHolder) {
+                HomeArticlesViewHolder holder = (HomeArticlesViewHolder) viewHolder;
+
+                final int pos = (mHeaderView == null) ? position : position - 1;
+                if (mDatasList.size() > 0) {
+                    ArticleDatas value = mDatasList.get(pos);
+                    holder.author.setText(mContext.getResources()
+                            .getString(R.string.author_prefix) + value.author);
+                    holder.date.setText(value.niceDate);
+                    holder.title.setText(value.title);
+                    if (mCategoryFlag) {
+                        holder.category.setText(value.chapterName);
+                    } else {
+                        // 不显示分类信息
+                        holder.category.setVisibility(View.GONE);
+                    }
+                }
+
+                if (mOnItemClickListener != null) {
+                    holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mOnItemClickListener.onClick(view, pos);
+                        }
+                    });
+                }
+
+                if (mOnItemChildClickListener != null) {
+                    holder.category.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mOnItemChildClickListener.onClick(view, pos);
+                        }
+                    });
                 }
             }
-
-            if (mOnItemClickListener != null) {
-                holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mOnItemClickListener.onClick(pos);
-                    }
-                });
-            }
-
-            if (mOnItemChildClickListener != null) {
-                holder.category.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mOnItemChildClickListener.onClick(view, pos);
-                    }
-                });
-            }
-        } else if (viewHolder instanceof FooterViewHolder) {
-            FooterViewHolder holder = (FooterViewHolder) viewHolder;
-
-            switch (loadState) {
-                case LOADING:
-                    holder.progressBar.setVisibility(View.VISIBLE);
-                    holder.textView.setVisibility(View.VISIBLE);
-                    holder.linearLayout.setVisibility(View.GONE);
-                    break;
-                case LOADING_COMPLETE:
-                    holder.progressBar.setVisibility(View.GONE);
-                    holder.textView.setVisibility(View.GONE);
-                    holder.linearLayout.setVisibility(View.GONE);
-                    break;
-                case LOADING_NULL:
-                    holder.progressBar.setVisibility(View.GONE);
-                    holder.textView.setVisibility(View.GONE);
-                    holder.linearLayout.setVisibility(View.VISIBLE);
-                    break;
+        } else if (getItemViewType(position) == TYPE_FOOTER) {
+            if (viewHolder instanceof FooterViewHolder) {
+                FooterViewHolder footerHolder = (FooterViewHolder) viewHolder;
+                switch (loadState) {
+                    case LOADING:
+                        footerHolder.progressBar.setVisibility(View.VISIBLE);
+                        footerHolder.textView.setVisibility(View.VISIBLE);
+                        footerHolder.linearLayout.setVisibility(View.GONE);
+                        break;
+                    case LOADING_COMPLETE:
+                        footerHolder.progressBar.setVisibility(View.GONE);
+                        footerHolder.textView.setVisibility(View.GONE);
+                        footerHolder.linearLayout.setVisibility(View.GONE);
+                        break;
+                    case LOADING_NULL:
+                        footerHolder.progressBar.setVisibility(View.GONE);
+                        footerHolder.textView.setVisibility(View.GONE);
+                        footerHolder.linearLayout.setVisibility(View.VISIBLE);
+                        break;
+                }
             }
         }
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == LIST_FIRST_POSITION) {
-            return TYPE_BANNER;
-        } else if (position == getItemCount() - 1) {
+        if (position == FIRST_POSITION && mHeaderView != null) {
+            return TYPE_HEADER;
+        } else if (position == getItemCount() - 1 && mFooterView != null) {
             return TYPE_FOOTER;
         } else {
-            return super.getItemViewType(position);
+            return TYPE_NORMAL;
         }
     }
 
     @Override
     public int getItemCount() {
-//        return mHeaderView == null ? mDatasList.size() : mDatasList.size() + 1;
-        return mHeaderView == null ? mDatasList.size() + 1 : mDatasList.size() + 2;
+        if (mHeaderView == null && mFooterView == null) {
+            return mDatasList.size();
+        } else if (mHeaderView == null && mFooterView != null) {
+            return mDatasList.size() + 1;
+        } else if (mHeaderView != null && mFooterView == null) {
+            return mDatasList.size() + 1;
+        } else {
+            return mDatasList.size() + 2;
+        }
     }
 
     /**
@@ -182,13 +206,38 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         notifyDataSetChanged();
     }
 
+    /**
+     * 设置头部视图Header
+     * @param headerView
+     */
     public void setHeaderView(View headerView) {
         mHeaderView = headerView;
-        notifyItemInserted(0);
+        notifyItemInserted(FIRST_POSITION);
     }
 
     public View getHeaderView() {
         return mHeaderView;
+    }
+
+    /**
+     * 设置尾部视图Footer
+     * @param footerView
+     */
+    public void setFooterView(View footerView) {
+        mFooterView = footerView;
+        notifyItemInserted(getItemCount() - 1);
+    }
+
+    public View getFooterView() {
+        return mFooterView;
+    }
+
+    /**
+     * 获取列表中数据的总数量
+     * @return 数据总数
+     */
+    public int getDataCount() {
+        return mDatasList.size();
     }
 
     /**
@@ -198,7 +247,6 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void addItems(List list) {
         mDatasList.addAll(list);
         notifyItemRangeInserted(mDatasList.size(), list.size());
- //       notifyDataSetChanged();
     }
 
     /**
@@ -213,16 +261,11 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return mDatasList.get(position);
     }
 
-/*    public void setBannerImages(List<String> images) {
-        mImages = images;
-        mBannerViewHolder.banner.update(mImages);
-    }*/
-
     /**
      * Item项点击事件监听器
      */
     public interface OnItemClickListener {
-        void onClick(int position);
+        void onClick(View view, int position);
     }
 
     /**

@@ -16,6 +16,11 @@ public interface Constant {
      */
     int PAGE_CODE_START = 0;
 
+    /**
+     * 每一页数据数量
+     */
+    int PAGE_SIZE = 20;
+
     String ARG_FIRST_TITLE = "first_title";
 
     String ARG_SECONDARY_TITLE = "secondary_title";

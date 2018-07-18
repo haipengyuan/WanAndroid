@@ -143,7 +143,7 @@ public class HomeFragment extends BaseFragment implements HomepageContract.View 
         mArticlesAdapter.setOnItemClickListener(new HomeArticlesAdapter.OnItemClickListener() {
             @SuppressLint("NewApi")
             @Override
-            public void onClick(int position) {
+            public void onClick(View view, int position) {
                 Log.e(TAG, mArticlesAdapter.getItem(position).link);
                 Intent intent = new Intent(getMActivity(), ArticleContentActivity.class);
                 intent.putExtra(Constant.CONTENT_URL_KEY, mArticlesAdapter.getItem(position).link);

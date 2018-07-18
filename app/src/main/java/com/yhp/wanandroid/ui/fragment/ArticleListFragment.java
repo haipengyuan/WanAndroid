@@ -9,7 +9,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -50,9 +52,12 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
 
     private CategoryArticlesPresenter mPresenter = new CategoryArticlesPresenter(this);
 
+    /**
+     * 文章分类id
+     */
     private int cid;
 
-    private boolean firstStart;
+    private boolean mFirstStart;
 
     public static ArticleListFragment newInstance(int cid) {
         ArticleListFragment fragment = new ArticleListFragment();
@@ -71,8 +76,8 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        firstStart = true;
-        loadArticles(Constant.PAGE_CODE_START, cid);
+        mFirstStart = true;
+        updateArticles();
     }
 
     @Override
@@ -87,6 +92,12 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
 
         // 设置categoryFlag为false，不显示分类信息
         mArticlesAdapter = new HomeArticlesAdapter(getMActivity(), false);
+
+        // 设置尾部加载动画
+        View footerView = LayoutInflater.from(getMActivity())
+                .inflate(R.layout.refresh_footer, mContentView, false);
+        mArticlesAdapter.setFooterView(footerView);
+
         mContentView.setAdapter(mArticlesAdapter);
 
         // 设置下拉刷新动画的颜色
@@ -97,12 +108,13 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
             @Override
             public void onRefresh() {
                 mArticlesAdapter.clear();
-                loadArticles(Constant.PAGE_CODE_START, cid);
+                updateArticles();
             }
         });
 
-        // RecyclerView滚动事件监听
-/*        mContentView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        // 为RecyclerView添加滚动监听，实现上拉加载
+        mContentView.addOnScrollListener(new FooterRecyclerOnScrollListener() {
+
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -110,28 +122,21 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
                 // 当位于RecyclerView顶部的时候隐藏FAB，位于其他位置显示FAB
                 mFAB.setVisibility(mLayoutManager.findFirstVisibleItemPosition() > 0
                         ? View.VISIBLE : View.GONE);
-
-                // 滑动到最后一项时加载数据
-                *//*if (!mSwipeRefreshLayout.isRefreshing()
-                        && mLayoutManager.findLastVisibleItemPosition()
-                        == mArticlesAdapter.getItemCount() - 1) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                    loadArticles(mArticlesAdapter.getItemCount() / 20, cid);
-                }*//*
             }
-        });*/
 
-        mContentView.addOnScrollListener(new FooterRecyclerOnScrollListener() {
             @Override
             public void onLoadMore() {
+                // 设置状态为正在加载
                 mArticlesAdapter.setLoadState(HomeArticlesAdapter.LOADING);
-                loadArticles(mArticlesAdapter.getItemCount() / 20, cid);
+
+                // 加载数据
+                loadMoreArticles();
             }
         });
 
         mArticlesAdapter.setOnItemClickListener(new HomeArticlesAdapter.OnItemClickListener() {
             @Override
-            public void onClick(int position) {
+            public void onClick(View view, int position) {
                 Log.e(TAG, mArticlesAdapter.getItem(position).link);
                 Intent intent = new Intent(getMActivity(), ArticleContentActivity.class);
                 intent.putExtra(Constant.CONTENT_URL_KEY, mArticlesAdapter.getItem(position).link);
@@ -166,9 +171,9 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
             mArticlesAdapter.setLoadState(HomeArticlesAdapter.LOADING_NULL);
         }
 
-        if (firstStart) {
+        if (mFirstStart) {
             showContentView();
-            firstStart = false;
+            mFirstStart = false;
         }
     }
 
@@ -181,12 +186,18 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
     }
 
     /**
-     * 请求获取文章
-     * @param page
-     * @param cid
+     * 更新文章数据
      */
-    private void loadArticles(int page, int cid) {
-        Log.e(TAG, "loadArticles");
+    private void updateArticles() {
+        // 获取cid分类下第一页的数据
+        mPresenter.getHomeArticles(Constant.PAGE_CODE_START, cid);
+    }
+
+    /**
+     * 加载更多文章数据
+     */
+    private void loadMoreArticles() {
+        int page = (int) Math.ceil(mArticlesAdapter.getDataCount() / (double) Constant.PAGE_SIZE);
         mPresenter.getHomeArticles(page, cid);
     }
 
