@@ -8,10 +8,10 @@
 
     <ImageView
         android:id="@+id/nav_header_avatar"
-        android:src="@drawable/logo"
+        android:src="@drawable/ic_user_avatar2"
         android:layout_gravity="center_horizontal"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_centerInParent="true" />
 
     <TextView
@@ -22,5 +22,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:layout_below="@id/nav_header_avatar"
         android:layout_centerHorizontal="true"
-        android:text="未登录"/>
+        android:text="@string/go_to_login"
+        android:textColor="@color/white" />
 </RelativeLayout>

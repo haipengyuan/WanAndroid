@@ -2,6 +2,7 @@ package com.yhp.wanandroid.ui.adapter.viewholder;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -22,6 +23,8 @@ public class HomeArticlesViewHolder extends RecyclerView.ViewHolder {
     public TextView category;
     @BindView(R.id.relative_layout)
     public RelativeLayout relativeLayout;
+    @BindView(R.id.article_stared)
+    public ImageView starIV;
 
     public HomeArticlesViewHolder(View itemView) {
         super(itemView);

@@ -5,46 +5,66 @@ import java.util.List;
 public class ArticleDatas {
 
     /**
-     * apkLink :
-     * author : l455202325
-     * chapterId : 337
-     * chapterName : 快应用
-     * collect : false
-     * courseId : 13
-     * desc : 快应用API Demo 集合 QuickAPP
-     * envelopePic : http://www.wanandroid.com/blogimgs/589f3b01-d9d5-41b0-aeff-604b900aacd1.png
-     * fresh : false
-     * id : 2879
-     * link : http://www.wanandroid.com/blog/show/2120
-     * niceDate : 2018-04-27
-     * origin :
-     * projectLink : https://github.com/l455202325/APIDemo
-     * publishTime : 1524832705000
-     * superChapterId : 294
-     * superChapterName : 开源项目主Tab
-     * tags : [{"name":"项目","url":"/project/list/1?cid=337"}]
-     * title : 快应用API Demo 集合 QuickAPP APIDemo
-     * type : 0
-     * userId : -1
-     * visible : 1
-     * zan : 0
+     *                 "apkLink": "",
+     *                 "audit": 1,
+     *                 "author": "",
+     *                 "canEdit": false,
+     *                 "chapterId": 502,
+     *                 "chapterName": "自助",
+     *                 "collect": false,
+     *                 "courseId": 13,
+     *                 "desc": "",
+     *                 "descMd": "",
+     *                 "envelopePic": "",
+     *                 "fresh": true,
+     *                 "host": "",
+     *                 "id": 17415,
+     *                 "link": "https://juejin.cn/post/6932778923491065864",
+     *                 "niceDate": "2小时前",
+     *                 "niceShareDate": "2小时前",
+     *                 "origin": "",
+     *                 "prefix": "",
+     *                 "projectLink": "",
+     *                 "publishTime": 1614218071000,
+     *                 "realSuperChapterId": 493,
+     *                 "selfVisible": 0,
+     *                 "shareDate": 1614218071000,
+     *                 "shareUser": "renxhui",
+     *                 "superChapterId": 494,
+     *                 "superChapterName": "广场Tab",
+     *                 "tags": [],
+     *                 "title": "Gradle学习系列（一）：Groovy学习",
+     *                 "type": 0,
+     *                 "userId": 27931,
+     *                 "visible": 1,
+     *                 "zan": 0
      */
 
     public String apkLink;
+    public int audit;
     public String author;
+    public boolean canEdit;
     public int chapterId;
     public String chapterName;
     public boolean collect;
     public int courseId;
     public String desc;
+    public String descMd;
     public String envelopePic;
     public boolean fresh;
+    public String host;
     public int id;
     public String link;
     public String niceDate;
+    public String niceShareDate;
     public String origin;
+    public String prefix;
     public String projectLink;
     public long publishTime;
+    public int realSuperChapterId;
+    public int selfVisible;
+    public long shareDate;
+    public String shareUser;
     public int superChapterId;
     public String superChapterName;
     public String title;

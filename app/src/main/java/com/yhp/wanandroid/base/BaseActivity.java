@@ -8,9 +8,16 @@ import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.view.Window;
 
+import com.yhp.wanandroid.R;
+
+import org.greenrobot.eventbus.EventBus;
+
 import butterknife.ButterKnife;
 
 public abstract class BaseActivity extends AppCompatActivity {
+
+    protected static boolean isLogin = false;
+    // protected static String user = "去登录";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,6 +34,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         setContentView(getLayoutId());
 
         ButterKnife.bind(this);
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     public abstract int getLayoutId();

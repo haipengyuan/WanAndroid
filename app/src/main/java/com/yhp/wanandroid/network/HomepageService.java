@@ -8,6 +8,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface HomepageService {
@@ -30,4 +31,19 @@ public interface HomepageService {
     @GET("banner/json")
     Observable<NetworkResponse<List<HomeBannerData>>> getBanner();
 
+    /**
+     * 取消收藏
+     * @param id
+     * @return
+     */
+    @POST("lg/uncollect_originId/{id}/json")
+    Observable<NetworkResponse<String>> cancelStar(@Path("id") int id);
+
+    /**
+     * 添加收藏
+     * @param id
+     * @return
+     */
+    @POST("lg/collect/{id}/json")
+    Observable<NetworkResponse<String>> addStar(@Path("id") int id);
 }

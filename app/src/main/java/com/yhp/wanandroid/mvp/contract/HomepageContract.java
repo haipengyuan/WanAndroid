@@ -36,6 +36,14 @@ public interface HomepageContract {
          * @param e 异常
          */
         void onBannerError(Throwable e);
+
+        void onCancelStarSuccess(NetworkResponse<String> response);
+
+        void onCancelStarError(Throwable e);
+
+        void onAddStarSuccess(NetworkResponse<String> response);
+
+        void onAddStarError(Throwable e);
     }
 
     interface Presenter extends BasePresenter {
@@ -50,6 +58,18 @@ public interface HomepageContract {
          * 获取首页Banner图
          */
         void getBanner();
+
+        /**
+         * 取消收藏
+         * @param id
+         */
+        void cancelStarArticle(int id);
+
+        /**
+         * 收藏文章
+         * @param id
+         */
+        void addStarArticle(int id);
     }
 
 }

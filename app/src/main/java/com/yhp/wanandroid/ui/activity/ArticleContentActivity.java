@@ -16,6 +16,9 @@ import com.yhp.wanandroid.R;
 import com.yhp.wanandroid.base.BaseActivity;
 import com.yhp.wanandroid.constant.Constant;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import butterknife.BindView;
 
 public class ArticleContentActivity extends BaseActivity {
@@ -111,4 +114,6 @@ public class ArticleContentActivity extends BaseActivity {
                 .go(mUrl);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(Object event) {}
 }

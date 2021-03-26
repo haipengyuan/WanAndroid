@@ -8,4 +8,5 @@
     <color name="item_pressed">#d6d6d6</color>
     <color name="dividerGray">#EDEDED</color>
     <color name="tabIndicator">#FF6666</color>
+    <color name="transparent_75">#ba000000</color>
 </resources>

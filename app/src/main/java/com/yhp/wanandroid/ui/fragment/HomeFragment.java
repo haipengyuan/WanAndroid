@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,6 +26,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import com.yhp.wanandroid.R;
 import com.yhp.wanandroid.base.BaseFragment;
+import com.yhp.wanandroid.bean.ArticleDatas;
 import com.yhp.wanandroid.bean.HomeArticlesData;
 import com.yhp.wanandroid.bean.HomeBannerData;
 import com.yhp.wanandroid.bean.NetworkResponse;
@@ -32,8 +34,10 @@ import com.yhp.wanandroid.constant.Constant;
 import com.yhp.wanandroid.mvp.contract.HomepageContract;
 import com.yhp.wanandroid.mvp.presenter.HomepagePresenter;
 import com.yhp.wanandroid.ui.activity.ArticleContentActivity;
+import com.yhp.wanandroid.ui.activity.LoginActivity;
 import com.yhp.wanandroid.ui.adapter.HomeArticlesAdapter;
 import com.yhp.wanandroid.util.GlideImageLoader;
+import com.yhp.wanandroid.widget.CustomToast;
 import com.youth.banner.Banner;
 import com.youth.banner.listener.OnBannerListener;
 
@@ -69,12 +73,22 @@ public class HomeFragment extends BaseFragment implements HomepageContract.View 
     private HomeArticlesAdapter mArticlesAdapter;
     private LinearLayoutManager mLayoutManager;
 
+    private boolean isLogin;
+
     /**
      * 轮播图控件
      */
     private Banner mBanner;
 
+    /**
+     * 轮播图图片路径集合
+     */
     private List<String> mBannerImages = new ArrayList<>();
+
+    /**
+     * 轮播图图片对应的内容Url集合
+     */
+    private List<String> mBannerUrls = new ArrayList<>();
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -99,6 +113,11 @@ public class HomeFragment extends BaseFragment implements HomepageContract.View 
             @Override
             public void OnBannerClick(int position) {
                 Log.e(TAG, "OnBannerClick: " + position);
+                Intent intent = new Intent(getMActivity(), ArticleContentActivity.class);
+                intent.putExtra(Constant.CONTENT_URL_KEY, mBannerUrls.get(position));
+                startActivity(intent);
+                getMActivity().overridePendingTransition(R.anim.activity_translate_enter,
+                        R.anim.activity_translate_exit);
             }
         });
 
@@ -157,8 +176,30 @@ public class HomeFragment extends BaseFragment implements HomepageContract.View 
         mArticlesAdapter.setOnItemChildClickListener(new HomeArticlesAdapter.OnItemChildClickListener() {
             @Override
             public void onClick(View view, int position) {
-                if (view.getId() == R.id.article_category) {
-                    Log.e(TAG, mArticlesAdapter.getItem(position).chapterName);
+                ArticleDatas data = mArticlesAdapter.getItem(position);
+//                if (view.getId() == R.id.article_category) {
+//                    Log.e(TAG, mArticlesAdapter.getItem(position).chapterName);
+//                }
+
+                switch (view.getId()) {
+                    case R.id.article_stared:
+                        isLogin = pref.getBoolean(Constant.IS_LOGIN, false);
+                        if (isLogin) {
+                            boolean collect = data.collect;
+                            data.collect = !collect;
+                            if (collect) {
+                                mPresenter.cancelStarArticle(data.id);
+                            } else {
+                                mPresenter.addStarArticle(data.id);
+                            }
+                        } else {
+                            new CustomToast(getMActivity(), getString(R.string.login_tint)).show();
+                            Intent intent = new Intent(getMActivity(), LoginActivity.class);
+                            startActivity(intent);
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         });
@@ -251,6 +292,7 @@ public class HomeFragment extends BaseFragment implements HomepageContract.View 
             mBannerImages.clear();
             for (HomeBannerData data : response.data) {
                 mBannerImages.add(data.imagePath);
+                mBannerUrls.add((data.url));
             }
             mBanner.setImages(mBannerImages);
             mBanner.start();
@@ -259,6 +301,34 @@ public class HomeFragment extends BaseFragment implements HomepageContract.View 
 
     @Override
     public void onBannerError(Throwable e) {
+        Log.e(TAG, "onError: " + e.getMessage());
+    }
+
+    @Override
+    public void onCancelStarSuccess(NetworkResponse<String> response) {
+        if (response.errorCode == 0) {
+            new CustomToast(getMActivity(), "取消收藏").show();
+            mArticlesAdapter.clear();
+            loadArticles(0);
+        }
+    }
+
+    @Override
+    public void onCancelStarError(Throwable e) {
+        Log.e(TAG, "onError: " + e.getMessage());
+    }
+
+    @Override
+    public void onAddStarSuccess(NetworkResponse<String> response) {
+        if (response.errorCode == 0) {
+            new CustomToast(getMActivity(), "已收藏").show();
+            mArticlesAdapter.clear();
+            loadArticles(0);
+        }
+    }
+
+    @Override
+    public void onAddStarError(Throwable e) {
         Log.e(TAG, "onError: " + e.getMessage());
     }
 
@@ -311,6 +381,11 @@ public class HomeFragment extends BaseFragment implements HomepageContract.View 
      */
     private void loadBanner() {
         mPresenter.getBanner();
+    }
+
+    public void lazyLoad() {
+        mArticlesAdapter.clear();
+        loadArticles(0);
     }
 
 }

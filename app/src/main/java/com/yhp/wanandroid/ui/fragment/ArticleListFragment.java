@@ -18,14 +18,17 @@ import android.widget.RelativeLayout;
 
 import com.yhp.wanandroid.R;
 import com.yhp.wanandroid.base.BaseFragment;
+import com.yhp.wanandroid.bean.ArticleDatas;
 import com.yhp.wanandroid.bean.HomeArticlesData;
 import com.yhp.wanandroid.bean.NetworkResponse;
 import com.yhp.wanandroid.constant.Constant;
 import com.yhp.wanandroid.mvp.contract.CategoryArticlesContract;
 import com.yhp.wanandroid.mvp.presenter.CategoryArticlesPresenter;
 import com.yhp.wanandroid.ui.activity.ArticleContentActivity;
+import com.yhp.wanandroid.ui.activity.LoginActivity;
 import com.yhp.wanandroid.ui.adapter.HomeArticlesAdapter;
 import com.yhp.wanandroid.ui.listener.FooterRecyclerOnScrollListener;
+import com.yhp.wanandroid.widget.CustomToast;
 
 import butterknife.BindView;
 
@@ -58,6 +61,8 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
     private int cid;
 
     private boolean mFirstStart;
+
+    private boolean isLogin;
 
     public static ArticleListFragment newInstance(int cid) {
         ArticleListFragment fragment = new ArticleListFragment();
@@ -144,6 +149,34 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
             }
         });
 
+        mArticlesAdapter.setOnItemChildClickListener(new HomeArticlesAdapter.OnItemChildClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                ArticleDatas data = mArticlesAdapter.getItem(position);
+                switch (view.getId()) {
+                    case R.id.article_stared:
+                        isLogin = pref.getBoolean(Constant.IS_LOGIN, false);
+                        if (isLogin) {
+                            isLogin = pref.getBoolean(Constant.IS_LOGIN, false);
+                            boolean collect = data.collect;
+                            data.collect = !collect;
+                            if (collect) {
+                                mPresenter.cancelStarArticle(data.id);
+                            } else {
+                                mPresenter.addStarArticle(data.id);
+                            }
+                        } else {
+                            new CustomToast(getMActivity(), getString(R.string.login_tint)).show();
+                            Intent intent = new Intent(getMActivity(), LoginActivity.class);
+                            startActivity(intent);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -183,6 +216,34 @@ public class ArticleListFragment extends BaseFragment implements CategoryArticle
         closeSwipeRefresh();
 
         showErrorView();
+    }
+
+    @Override
+    public void onCancelStarSuccess(NetworkResponse<String> response) {
+        if (response.errorCode == 0) {
+            new CustomToast(getMActivity(), "取消收藏").show();
+            mArticlesAdapter.clear();
+            updateArticles();
+        }
+    }
+
+    @Override
+    public void onCancelStarError(Throwable e) {
+        Log.e(TAG, "onError: " + e.getMessage());
+    }
+
+    @Override
+    public void onAddStarSuccess(NetworkResponse<String> response) {
+        if (response.errorCode == 0) {
+            new CustomToast(getMActivity(), "已收藏").show();
+            mArticlesAdapter.clear();
+            updateArticles();
+        }
+    }
+
+    @Override
+    public void onAddStarError(Throwable e) {
+        Log.e(TAG, "onError: " + e.getMessage());
     }
 
     /**

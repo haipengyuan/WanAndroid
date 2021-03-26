@@ -34,10 +34,12 @@
         </LinearLayout>
 
         <android.support.design.widget.NavigationView
+            android:id="@+id/drawer_navigation_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            app:menu="@menu/menu_drawer_nav"
-            app:headerLayout="@layout/nav_header" />
+            app:itemIconTint="@color/black"
+            app:itemTextColor="@color/black"
+            app:menu="@menu/menu_drawer_nav" />
     </android.support.v4.widget.DrawerLayout>
 </LinearLayout>

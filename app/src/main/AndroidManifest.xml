@@ -11,19 +11,26 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
+        android:name=".app.MyApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+
+        <activity
+            android:name=".ui.activity.SplashActivity"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".MainActivity"/>
+
         <activity android:name=".ui.activity.ArticleContentActivity" />
         <activity
             android:name=".ui.activity.LoginActivity"
@@ -32,6 +39,10 @@
             android:name=".ui.activity.CategoryDetailActivity"
             android:label="@string/title_activity_category_detail"
             android:theme="@style/AppTheme" />
+        <activity android:name=".ui.activity.RegisterActivity" />
+        <activity android:name=".ui.activity.ScoreActivity" />
+        <activity android:name=".ui.activity.AboutUsAcitivity"/>
+        <activity android:name=".ui.activity.MyStarActivity"/>
     </application>
 
 </manifest>

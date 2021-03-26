@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_my_score"
+        android:icon="@drawable/ic_score_white_24dp"
+        android:title="@string/my_score"/>
+
     <item
         android:id="@+id/nav_my_star"
-        android:icon="@drawable/ic_my_star"
+        android:icon="@drawable/ic_star"
         android:title="@string/my_star"/>
 
     <item
         android:id="@+id/nav_setting"
-        android:icon="@drawable/ic_settings_black_24dp"
+        android:icon="@drawable/ic_setting_24dp"
         android:title="@string/setting" />
 
     <item
         android:id="@+id/nav_about_us"
-        android:icon="@drawable/ic_about_us"
-        android:title="@string/about_us"/>
+        android:icon="@drawable/ic_about_us_white_24dp"
+        android:title="@string/about_us" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/ic_logout_white_24dp"
+        android:title="@string/nav_logout"
+        android:visible="false" />
 </menu>

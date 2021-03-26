@@ -119,15 +119,29 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 final int pos = (mHeaderView == null) ? position : position - 1;
                 if (mDatasList.size() > 0) {
                     ArticleDatas value = mDatasList.get(pos);
-                    holder.author.setText(mContext.getResources()
-                            .getString(R.string.author_prefix) + value.author);
+                    if ("".equals(value.author)) {
+                        holder.author.setText(mContext.getResources()
+                                .getString(R.string.share_user) + value.shareUser);
+                    } else {
+                        holder.author.setText(mContext.getResources()
+                                .getString(R.string.author_prefix) + value.author);
+                    }
                     holder.date.setText(value.niceDate);
                     holder.title.setText(value.title);
                     if (mCategoryFlag) {
-                        holder.category.setText(value.chapterName);
+                        if ("null".equals(value.superChapterName)) {
+                            holder.category.setText((value.chapterName).trim());
+                        } else {
+                            holder.category.setText((value.superChapterName + "/" + value.chapterName).trim());
+                        }
                     } else {
                         // 不显示分类信息
                         holder.category.setVisibility(View.GONE);
+                    }
+                    if (value.collect) {
+                        holder.starIV.setImageResource(R.drawable.ic_my_star);
+                    } else {
+                        holder.starIV.setImageResource(R.drawable.ic_no_star);
                     }
                 }
 
@@ -142,6 +156,12 @@ public class HomeArticlesAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 if (mOnItemChildClickListener != null) {
                     holder.category.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mOnItemChildClickListener.onClick(view, pos);
+                        }
+                    });
+                    holder.starIV.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             mOnItemChildClickListener.onClick(view, pos);

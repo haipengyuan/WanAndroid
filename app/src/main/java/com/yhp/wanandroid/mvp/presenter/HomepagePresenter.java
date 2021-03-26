@@ -67,4 +67,46 @@ public class HomepagePresenter implements HomepageContract.Presenter {
                 });
     }
 
+    @Override
+    public void cancelStarArticle(int id) {
+        mService.cancelStar(id)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<NetworkResponse<String>>() {
+                    @Override
+                    public void accept(NetworkResponse<String> response) throws Exception {
+                        if (response == null) {
+                            mView.onCancelStarError(new Throwable("取消收藏失败"));
+                        }
+                        mView.onCancelStarSuccess(response);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        mView.onCancelStarError(throwable);
+                    }
+                });
+    }
+
+    @Override
+    public void addStarArticle(int id) {
+        mService.addStar(id)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<NetworkResponse<String>>() {
+                    @Override
+                    public void accept(NetworkResponse<String> response) throws Exception {
+                        if (response == null) {
+                            mView.onAddStarError(new Throwable("添加收藏失败"));
+                        }
+                        mView.onAddStarSuccess(response);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        mView.onAddStarError(throwable);
+                    }
+                });
+    }
+
 }

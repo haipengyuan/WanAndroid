@@ -2,7 +2,7 @@ package com.yhp.wanandroid.constant;
 
 public interface Constant {
 
-    String REQUEST_BASE_URL = "http://www.wanandroid.com/";
+    String REQUEST_BASE_URL = "https://www.wanandroid.com";
 
     String CONTENT_URL_KEY = "url";
 
@@ -26,4 +26,9 @@ public interface Constant {
     String ARG_SECONDARY_TITLE = "secondary_title";
 
     String CATEGORY_ID_LIST = "category_id_list";
+
+    String USER_PREF = "userPrefFile";
+    String IS_LOGIN = "is_login";
+    String USERNAME_KEY = "username";
+    String PASSWORD_KEY = "password";
 }
